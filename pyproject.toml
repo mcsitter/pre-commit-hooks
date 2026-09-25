@@ -1,0 +1,69 @@
+[project]
+name = "pre-commit-hooks"
+version = "0.0.1"
+description = "Reusable pre-commit hooks for Python projects."
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "copier",
+  "mypy",
+  "prek",
+  "pytest",
+  "ruff>=0.16.0",
+  { include-group = "types" },
+]
+types = []
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = true
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 88
+output-format = "concise"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "COM812",  # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+  "CPY001",  # https://docs.astral.sh/ruff/rules/missing-copyright-notice/
+  "D203",  # https://docs.astral.sh/ruff/rules/incorrect-blank-line-before-class/
+  "D213",  # https://docs.astral.sh/ruff/rules/multi-line-summary-second-line/
+  "S311",  # https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage/
+]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/*.py" = [
+  "INP001",  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+  "T201",  # https://docs.astral.sh/ruff/rules/print/
+]
+"tests/*.py" = [
+  "D100",  # https://docs.astral.sh/ruff/rules/undocumented-public-module/
+  "D103",  # https://docs.astral.sh/ruff/rules/undocumented-public-function/
+  "INP001",  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+  "S101",  # https://docs.astral.sh/ruff/rules/assert/
+  "TC002",  # https://docs.astral.sh/ruff/rules/typing-only-third-party-import/
+  "TC003",  # https://docs.astral.sh/ruff/rules/typing-only-standard-library-import/
+]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

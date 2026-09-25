@@ -1,0 +1,9 @@
+- id: ruff-rule-links
+  name: Ruff rule documentation links
+  description: Add canonical Ruff documentation links to pyproject.toml rule references.
+  entry: python -m pre_commit_hooks.ruff_rule_links
+  language: python
+  files: ^pyproject\.toml$
+  additional_dependencies:
+    - ruff>=0.16.0
+  require_serial: true

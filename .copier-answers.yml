@@ -1,0 +1,10 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_src_path: gh:mcsitter/project-template
+_commit: 7f94165
+pre_commit_tool: prek
+project_description: Reusable pre-commit hooks for Python projects.
+project_name: Pre Commit Hooks
+project_type: package
+python_version: '3.12'
+typing: true
+with_conventional_commits: true
