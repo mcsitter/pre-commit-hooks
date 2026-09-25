@@ -23,7 +23,7 @@ hook is idempotent and supports `--check`.
 ```yaml
 repos:
   - repo: https://github.com/mcsitter/pre-commit-hooks
-    rev: v0.1.0
+    rev: v0.0.2
     hooks:
       - id: sentence-per-line
 ```
