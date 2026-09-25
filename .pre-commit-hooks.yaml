@@ -7,3 +7,10 @@
   additional_dependencies:
     - ruff>=0.16.0
   require_serial: true
+
+- id: sentence-per-line
+  name: Markdown sentence per line
+  description: Put every Markdown sentence on its own line for readable diffs.
+  entry: python -m pre_commit_hooks.sentence_per_line
+  language: python
+  files: \.md$
