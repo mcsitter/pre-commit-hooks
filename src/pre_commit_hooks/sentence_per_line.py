@@ -47,6 +47,11 @@ def _split_sentences(line: str) -> list[str]:
     return restored
 
 
+def _indent_of(line: str) -> str:
+    """Return the leading whitespace of a line."""
+    return line[: len(line) - len(line.lstrip())]
+
+
 def _is_structural(line: str) -> bool:
     """Return whether a line is Markdown structure rather than prose."""
     stripped = line.lstrip()
@@ -55,10 +60,22 @@ def _is_structural(line: str) -> bool:
         or ADMONITION.match(stripped)
         or HEADING.match(stripped)
         or LIST_ITEM.match(line)
-        or THEMATIC_BREAK.match(line)
-        or TABLE_ROW.match(line)
-        or QUOTE.match(line)
+        or THEMATIC_BREAK.match(stripped)
+        or TABLE_ROW.match(stripped)
+        or QUOTE.match(stripped)
     )
+
+
+def _prose_lines(line: str) -> list[str]:
+    """Return the sentences a prose line expands to.
+
+    An indented line keeps that indentation on every sentence, not just the
+    first. An unindented line after a bullet is a new paragraph, so a dropped
+    indent silently ends the list item part-way through its own sentence, which
+    is the one thing this hook must never do.
+    """
+    indent = _indent_of(line)
+    return [indent + part for part in _split_sentences(line[len(indent) :])]
 
 
 def format_markdown(content: str) -> str:
@@ -91,7 +108,7 @@ def format_markdown(content: str) -> str:
         if not line.strip():
             output.append(line)
             continue
-        output.extend(_split_sentences(line))
+        output.extend(_prose_lines(line))
 
     return "\n".join(output) + "\n"
 

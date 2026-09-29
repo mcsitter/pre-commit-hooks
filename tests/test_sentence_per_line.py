@@ -61,3 +61,66 @@ def test_preserves_blank_lines() -> None:
 
 def test_adds_trailing_newline() -> None:
     assert format_markdown("A. B.") == "A.\nB.\n"
+
+
+def test_keeps_list_continuations_indented() -> None:
+    content = (
+        "- Full type hints, modern syntax: `X | None`, and\n"
+        "  `from __future__ import annotations`. Runtime-only types go behind\n"
+        "  `TYPE_CHECKING`.\n"
+        "- Keyword-only arguments get a bare `*`.\n"
+    )
+
+    assert format_markdown(content) == (
+        "- Full type hints, modern syntax: `X | None`, and\n"
+        "  `from __future__ import annotations`.\n"
+        "  Runtime-only types go behind\n"
+        "  `TYPE_CHECKING`.\n"
+        "- Keyword-only arguments get a bare `*`.\n"
+    )
+
+
+def test_keeps_nested_list_continuations_indented() -> None:
+    content = "- Outer item.\n  - Inner item. Still inner.\n    And deeper.\n"
+
+    # The bullet line itself is structure and stays as written; only its
+    # continuation is reflowed.
+    assert format_markdown(content) == (
+        "- Outer item.\n  - Inner item. Still inner.\n    And deeper.\n"
+    )
+
+
+def test_keeps_list_continuation_indented_across_a_blank_line() -> None:
+    content = "- First item.\n\n  Continues in a loose list.\n\nAfter.\n"
+
+    assert format_markdown(content) == (
+        "- First item.\n\n  Continues in a loose list.\n\nAfter.\n"
+    )
+
+
+def test_leaving_a_list_clears_the_list_context() -> None:
+    content = "- Item.\n\nNot in the list. Still not.\n"
+
+    assert format_markdown(content) == ("- Item.\n\nNot in the list.\nStill not.\n")
+
+
+def test_list_context_does_not_survive_a_fenced_block() -> None:
+    content = "- Item.\n\n```\n  x = 1. y = 2.\n```\n\n  After the fence. And more.\n"
+
+    assert format_markdown(content) == (
+        "- Item.\n\n```\n  x = 1. y = 2.\n```\n\n  After the fence.\n  And more.\n"
+    )
+
+
+def test_indented_code_block_keeps_its_indent_on_every_line() -> None:
+    content = "Intro. More.\n\n    x = 1. Y = 2.\n\nOutro.\n"
+
+    assert format_markdown(content) == (
+        "Intro.\nMore.\n\n    x = 1.\n    Y = 2.\n\nOutro.\n"
+    )
+
+
+def test_list_continuation_formatting_is_idempotent() -> None:
+    content = "- Item. Second.\n  Third. Fourth.\n"
+
+    assert format_markdown(format_markdown(content)) == format_markdown(content)
