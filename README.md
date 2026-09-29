@@ -27,7 +27,7 @@ Enable whichever hooks you want:
 ```yaml
 repos:
   - repo: https://github.com/mcsitter/pre-commit-hooks
-    rev: v0.0.2
+    rev: v0.0.3
     hooks:
       - id: ruff-rule-links
       - id: sentence-per-line
