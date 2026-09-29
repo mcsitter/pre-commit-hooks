@@ -20,10 +20,15 @@ Code fences, headings, lists, tables, block quotes, and MkDocs admonitions
 are left untouched, and text inside inline code spans is never split. The
 hook is idempotent and supports `--check`.
 
+## Installation
+
+Enable whichever hooks you want:
+
 ```yaml
 repos:
   - repo: https://github.com/mcsitter/pre-commit-hooks
     rev: v0.0.2
     hooks:
+      - id: ruff-rule-links
       - id: sentence-per-line
 ```
