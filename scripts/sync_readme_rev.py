@@ -33,8 +33,8 @@ def main() -> int:
     readme = README.read_text(encoding="utf-8")
     updated, count = REV_REFERENCE.subn(declared, readme)
     if count == 0:
-        print(f"error: no `rev: vX.Y.Z` install snippet found in {README}")
-        return 1
+        print(f"No `rev: vX.Y.Z` snippet in {README}; nothing to sync.")
+        return 0
 
     if updated == readme:
         print(f"README already references v{declared}")
