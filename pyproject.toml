@@ -9,10 +9,10 @@ dependencies = []
 dev = [
   "commitizen",
   "copier",
+  "coverage[toml]",
   "mypy",
   "prek",
   "pytest",
-  "ruff>=0.16.0",
   { include-group = "types" },
 ]
 types = []
@@ -30,8 +30,26 @@ update_changelog_on_bump = true
 major_version_zero = true
 post_bump_hooks = ["python scripts/sync_readme_rev.py"]
 
+[tool.coverage.run]
+branch = true
+source = ["src"]
+omit = ["*/__main__.py", "*/.venv/*"]
+
+# A floor, not a target. It exists to catch a large regression; it is not a
+# reason to write a test that only executes lines. Raise it deliberately.
+# The template itself is excluded: its scripts are thin subprocess wrappers, and
+# a floor there would only buy tests that execute lines.
+[tool.coverage.report]
+fail_under = 60
+show_missing = true
+skip_covered = false
+
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = ["-q"]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88
@@ -48,17 +66,35 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+  "D100",  # Ignore missing module docstrings in tests  # https://docs.astral.sh/ruff/rules/undocumented-public-module/
+  "D103",  # Ignore missing function docstrings in tests  # https://docs.astral.sh/ruff/rules/undocumented-public-function/
+  "INP001",  # Ignore implicit namespace packages in tests  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+  "S101",  # Ignore assert statements in tests  # https://docs.astral.sh/ruff/rules/assert/
+  "TC002",  # Move third-party imports into the type-checking block  # https://docs.astral.sh/ruff/rules/typing-only-third-party-import/
+  "TC003",  # Move standard library imports into the type-checking block  # https://docs.astral.sh/ruff/rules/typing-only-standard-library-import/
+]
 "scripts/*.py" = [
+  "C901",  # https://docs.astral.sh/ruff/rules/complex-structure/
   "INP001",  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+  "PLR0911",  # https://docs.astral.sh/ruff/rules/too-many-return-statements/
+  "PLR0912",  # https://docs.astral.sh/ruff/rules/too-many-branches/
+  "S603",  # https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/
   "T201",  # https://docs.astral.sh/ruff/rules/print/
 ]
-"tests/*.py" = [
-  "D100",  # https://docs.astral.sh/ruff/rules/undocumented-public-module/
-  "D103",  # https://docs.astral.sh/ruff/rules/undocumented-public-function/
+"template/tests/*.py" = [
+  "D100",  # Ignore missing module docstrings in tests  # https://docs.astral.sh/ruff/rules/undocumented-public-module/
+  "D103",  # Ignore missing function docstrings in tests  # https://docs.astral.sh/ruff/rules/undocumented-public-function/
+  "INP001",  # Ignore implicit namespace packages in tests  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+  "S101",  # Ignore assert statements in tests  # https://docs.astral.sh/ruff/rules/assert/
+]
+"template/scripts/*.py" = [
+  "C901",  # https://docs.astral.sh/ruff/rules/complex-structure/
   "INP001",  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
-  "S101",  # https://docs.astral.sh/ruff/rules/assert/
-  "TC002",  # https://docs.astral.sh/ruff/rules/typing-only-third-party-import/
-  "TC003",  # https://docs.astral.sh/ruff/rules/typing-only-standard-library-import/
+  "PLR0911",  # https://docs.astral.sh/ruff/rules/too-many-return-statements/
+  "PLR0912",  # https://docs.astral.sh/ruff/rules/too-many-branches/
+  "S603",  # https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/
+  "T201",  # https://docs.astral.sh/ruff/rules/print/
 ]
 
 [tool.ruff.lint.flake8-type-checking]

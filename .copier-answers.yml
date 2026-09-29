@@ -1,7 +1,6 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: fa5baa4
 _src_path: gh:mcsitter/project-template
-_commit: 7f94165
-pre_commit_tool: prek
 project_description: Reusable pre-commit hooks for Python projects.
 project_name: Pre Commit Hooks
 project_type: package
