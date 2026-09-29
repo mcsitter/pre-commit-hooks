@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 MAKEFLAGS += --no-print-directory
-.PHONY: check clean clean-generated clean-venv git help init sync update-from-template update-github update-pre-commit-hooks vscode-extensions
+.PHONY: check clean clean-generated clean-venv git help init release sync sync-readme update-from-template update-github update-pre-commit-hooks vscode-extensions
 
 UV ?= uv
 VENV_DIR := .venv
@@ -16,6 +16,9 @@ help:
 	@echo "Typical workflow:"
 	@echo "  make init                     Set up the project and development environment"
 	@echo "  make check                    Format and run quality checks"
+	@echo ""
+	@echo "Release:"
+	@echo "  make release                  Bump the version, sync the README, and tag (push manually)"
 	@echo ""
 	@echo "Maintenance:"
 	@echo "  make update-from-template     Update files from the project template"
@@ -51,6 +54,39 @@ check:
 		exit 1; \
 	fi
 	@echo "Quality checks passed."
+
+## Sync the README install snippet's rev with the pyproject version.
+sync-readme:
+	@$(UV) run --quiet python scripts/sync_readme_rev.py
+
+## Bump the version, sync the README, and tag the release.
+release:
+	$(UV) sync --group dev --quiet
+	@if ! git diff --quiet || ! git diff --cached --quiet; then \
+		echo "Git tree is not clean. Commit or stash changes first."; \
+		exit 1; \
+	fi
+	@$(MAKE) check
+	$(UV) run --quiet cz bump
+	@if ! git diff --quiet -- README.md; then \
+		TAG=$$(git tag --points-at HEAD --sort=-creatordate | head -n 1); \
+		if [ -n "$$TAG" ]; then \
+			TYPE=$$(git cat-file -t "$$TAG"); \
+			MSG=$$(git tag -l --format='%(contents)' "$$TAG"); \
+			git add README.md; \
+			git commit --amend --no-edit --no-verify >/dev/null; \
+			git tag -d "$$TAG" >/dev/null; \
+			if [ "$$TYPE" = "tag" ]; then \
+				printf '%s\n' "$$MSG" | git tag -a -F - "$$TAG" >/dev/null; \
+			else \
+				git tag "$$TAG" >/dev/null; \
+			fi; \
+			echo "Folded the synced README into the bump commit and retagged $$TAG."; \
+		fi; \
+	fi
+	@echo ""
+	@echo "Review the bump, then publish with:"
+	@echo "  git push && git push --tags"
 
 ## Update project files from the template.
 update-from-template:
@@ -155,7 +191,7 @@ update-github:
 			name="$$(awk '/^project_name:/ {sub(/^project_name: /, ""); print}' .copier-answers.yml | tr '[:upper:]' '[:lower:]' | tr ' _' '--')"; \
 			owner="$$(gh api user --jq '.login')"; \
 			repo="$$owner/$$name"; \
-			description="$$(awk '/^project_description:/ {sub(/^project_description:/, ""); print}' .copier-answers.yml)"; \
+			description="$$(awk '/^project_description:/ {sub(/^project_description: /, ""); print}' .copier-answers.yml)"; \
 			if gh repo view "$$repo" >/dev/null 2>&1; then \
 				echo "Updating GitHub repository metadata..."; \
 				gh repo edit "$$repo" \
